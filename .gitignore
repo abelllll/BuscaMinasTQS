@@ -1,0 +1,9 @@
+# Directorios generados por Maven
+target/
+
+# Archivos de configuración de IDEs
+.idea/
+*.iml
+
+# Archivos del sistema
+.DS_Store
