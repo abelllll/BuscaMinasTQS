@@ -10,7 +10,7 @@ public class TableroTest {
     void testInicializacionDimensionesYCeldas() {
         int filas = 5, columnas = 6, minas = 0;
         Random rng = new Random(42); // Semilla fija para pruebas
-        Tablero t = new Tablero(filas, columnas, minas, rng);
+        tablero t = new tablero(filas, columnas, minas, rng);
 
         assertEquals(filas, t.getFilas(), "Filas incorrectas");
         assertEquals(columnas, t.getColumnas(), "Columnas incorrectas");
