@@ -2,7 +2,7 @@ package com.abelg.buscaminas.Modelo;
 
 import java.util.Random;
 
-class Tablero {
+public class Tablero {
     private final int filas;
     private final int columnas;
     private final int numMinas;
@@ -23,7 +23,10 @@ class Tablero {
                 this.celdas[f][c] = new casilla();
             }
         }
-        // Colocación de minas y cálculo de adyacencias se harán en iteraciones posteriores
+
+        // Paso 2B: colocar minas (determinista con la semilla de rng)
+        colocarMinas(rng);
+        // El cálculo de adyacencias se hará en el siguiente paso (Etapa 3)
     }
 
     public int getFilas() { return filas; }
@@ -37,5 +40,18 @@ class Tablero {
 
     private boolean esValida(int f, int c) {
         return f >= 0 && f < filas && c >= 0 && c < columnas;
+    }
+
+    // --- Nuevo en Paso 2B ---
+    private void colocarMinas(Random rng) {
+        int colocadas = 0;
+        while (colocadas < numMinas) {
+            int f = rng.nextInt(filas);
+            int c = rng.nextInt(columnas);
+            if (!celdas[f][c].isMinada()) {
+                celdas[f][c].setMinada(true);
+                colocadas++;
+            }
+        }
     }
 }
