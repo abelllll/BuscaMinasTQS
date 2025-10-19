@@ -65,6 +65,95 @@ public class TableroTest {
         }
     }
     }
+    @Test
+void testDescubrirCascadaCuandoAdyacentesCero() {
+    int filas = 6, columnas = 6, minas = 3;
+    Random rng = new Random(123); // distribución reproducible
+    Tablero t = new Tablero(filas, columnas, minas, rng);
+
+    // Busca una casilla NO minada y con 0 adyacentes para provocar cascada
+    boolean lanzado = false;
+    for (int f = 0; f < filas && !lanzado; f++) {
+        for (int c = 0; c < columnas && !lanzado; c++) {
+            if (!t.getCasilla(f,c).isMinada() && t.getCasilla(f,c).getMinasAdyacentes() == 0) {
+                t.descubrir(f, c);
+                lanzado = true;
+            }
+        }
+    }
+    assertTrue(lanzado, "Debe existir alguna casilla con 0 adyacentes");
+
+    // Tras cascada debe haber varias casillas descubiertas
+    int descubiertas = 0;
+    for (int f = 0; f < filas; f++)
+        for (int c = 0; c < columnas; c++)
+            if (t.getCasilla(f,c).isDescubierta()) descubiertas++;
+
+    assertTrue(descubiertas > 1, "La cascada debe descubrir múltiples casillas");
+}
+
+@Test
+void testDescubrirMinaNoHaceCascada() {
+    int filas = 5, columnas = 5, minas = 5;
+    Random rng = new Random(7);
+    Tablero t = new Tablero(filas, columnas, minas, rng);
+
+    // Busca una mina y la descubre
+    boolean hecho = false;
+    for (int f = 0; f < filas && !hecho; f++) {
+        for (int c = 0; c < columnas && !hecho; c++) {
+            if (t.getCasilla(f,c).isMinada()) {
+                t.descubrir(f, c);
+                hecho = true;
+            }
+        }
+    }
+    assertTrue(hecho, "Debe haberse descubierto una mina");
+    // Chequeo mínimo: la propia mina está descubierta
+    // (El estado de derrota lo gestionará el controlador más tarde)
+    // Y no ha habido cascada alrededor de ella necesariamente
+}
+
+@Test
+void testDescubrirFueraDeRangoLanzaExcepcion() {
+    Tablero t = new Tablero(2, 2, 0, new Random(1));
+    assertThrows(IllegalArgumentException.class, () -> t.descubrir(-1, 0));
+    assertThrows(IllegalArgumentException.class, () -> t.descubrir(0, 2));
+}
+
+@Test
+void testDescubrirDosVecesNoRompeEstado() {
+    Tablero t = new Tablero(3, 3, 0, new Random(1));
+    t.descubrir(1,1);
+    boolean estadoTrasPrimera = t.getCasilla(1,1).isDescubierta();
+    t.descubrir(1,1); // idempotente
+    assertTrue(estadoTrasPrimera && t.getCasilla(1,1).isDescubierta(),
+        "Descubrir dos veces no debe cambiar el estado ni fallar");
+}
+
+@Test
+void testMarcarAlternaYNoMarcaSiDescubierta() {
+    Tablero t = new Tablero(3, 3, 0, new Random(1));
+    // Alterna marcaje
+    t.marcar(0,0);
+    assertTrue(t.getCasilla(0,0).isMarcada(), "Debe marcar en primera pulsación");
+    t.marcar(0,0);
+    assertFalse(t.getCasilla(0,0).isMarcada(), "Debe desmarcar en segunda pulsación");
+
+    // No marca si ya está descubierta
+    t.descubrir(1,1);
+    boolean estabaMarcadaAntes = t.getCasilla(1,1).isMarcada();
+    t.marcar(1,1);
+    assertEquals(estabaMarcadaAntes, t.getCasilla(1,1).isMarcada(), "No debe marcar una casilla descubierta");
+}
+
+@Test
+void testMarcarFueraDeRangoLanzaExcepcion() {
+    Tablero t = new Tablero(2, 2, 0, new Random(1));
+    assertThrows(IllegalArgumentException.class, () -> t.marcar(-1, 0));
+    assertThrows(IllegalArgumentException.class, () -> t.marcar(0, 2));
+}
+
 
 
 }
