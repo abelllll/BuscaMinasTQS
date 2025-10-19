@@ -38,4 +38,24 @@ public class juegoTest {
         assertTrue(juego.isTerminado(), "La partida debe terminar al descubrir mina");
         assertEquals(EstadoPartida.PERDIDA, juego.getEstado(), "Estado debe ser PERDIDA");
     }
+    @Test
+void testVictoriaCuandoTodasNoMinadasDescubiertas() {
+    // Tablero pequeño con 1 mina
+    Tablero tablero = new Tablero(3, 3, 1, new Random(5));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
+
+    // Descubre todas las casillas NO minadas
+    for (int f=0; f<tablero.getFilas(); f++) {
+        for (int c=0; c<tablero.getColumnas(); c++) {
+            if (!tablero.getCasilla(f,c).isMinada()) {
+                juego.procesarDescubrir(f, c);
+            }
+        }
+    }
+
+    assertTrue(juego.isTerminado(), "Debe terminar cuando todas las no minadas estén descubiertas");
+    assertEquals(EstadoPartida.GANADA, juego.getEstado(), "Estado debe ser GANADA");
+}
+
 }
