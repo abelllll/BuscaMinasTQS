@@ -81,4 +81,39 @@ public class Tablero {
         }
         return count;
     }
+    public void descubrir(int f, int c) {
+    if (!esValida(f, c)) throw new IllegalArgumentException("Coordenada fuera de rango");
+    casilla celda = celdas[f][c];
+
+    // No hacemos nada si ya está descubierta o si está marcada
+    if (celda.isDescubierta() || celda.isMarcada()) return;
+
+    // Descubrir esta casilla
+    celda.descubrir();
+
+    // Si es mina, no hay cascada (el controlador decidirá derrota)
+    if (celda.isMinada()) return;
+
+    // Si tiene 0 adyacentes, cascada en 8 direcciones
+    if (celda.getMinasAdyacentes() == 0) {
+        for (int df = -1; df <= 1; df++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (df == 0 && dc == 0) continue;
+                int nf = f + df, nc = c + dc;
+                if (esValida(nf, nc) && !celdas[nf][nc].isDescubierta() && !celdas[nf][nc].isMinada()) {
+                    descubrir(nf, nc);
+                }
+            }
+        }
+    }
+}
+
+public void marcar(int f, int c) {
+    if (!esValida(f, c)) throw new IllegalArgumentException("Coordenada fuera de rango");
+    casilla celda = celdas[f][c];
+    // No permitir marcar si ya está descubierta
+    if (celda.isDescubierta()) return;
+    // Alterna marcado con tu método existente
+    celda.marcar();
+}
 }
