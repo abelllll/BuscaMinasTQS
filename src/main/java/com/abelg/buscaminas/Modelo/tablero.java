@@ -26,7 +26,9 @@ public class Tablero {
 
         // Paso 2B: colocar minas (determinista con la semilla de rng)
         colocarMinas(rng);
-        // El cálculo de adyacencias se hará en el siguiente paso (Etapa 3)
+
+        // Paso 3B: calcular minas adyacentes tras colocar las minas
+        calcularMinasAdyacentes();
     }
 
     public int getFilas() { return filas; }
@@ -42,7 +44,7 @@ public class Tablero {
         return f >= 0 && f < filas && c >= 0 && c < columnas;
     }
 
-    // --- Nuevo en Paso 2B ---
+    // --- Paso 2B ---
     private void colocarMinas(Random rng) {
         int colocadas = 0;
         while (colocadas < numMinas) {
@@ -53,5 +55,30 @@ public class Tablero {
                 colocadas++;
             }
         }
+    }
+
+    // --- Paso 3B ---
+    private void calcularMinasAdyacentes() {
+        for (int f = 0; f < filas; f++) {
+            for (int c = 0; c < columnas; c++) {
+                if (!celdas[f][c].isMinada()) {
+                    celdas[f][c].setMinasAdyacentes(contarMinasAdyacentes(f, c));
+                }
+            }
+        }
+    }
+
+    private int contarMinasAdyacentes(int f, int c) {
+        int count = 0;
+        for (int df = -1; df <= 1; df++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (df == 0 && dc == 0) continue;
+                int nf = f + df, nc = c + dc;
+                if (esValida(nf, nc) && celdas[nf][nc].isMinada()) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 }
