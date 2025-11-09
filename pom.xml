@@ -94,33 +94,42 @@
 
           <!-- (MODIFICADO) Generar informe + verificar reglas en verify -->
           <execution>
-            <id>report-and-check</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>report</goal>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <rule>
-                  <!-- (MODIFICADO) Gate por CLASE -->
-                  <element>CLASS</element>
-                  <!-- (Opcional) Limitar a tus paquetes -->
-                  <includes>
-                    <include>com.abelg.buscaminas.*</include>
-                  </includes>
-                  <limits>
-                    <!-- (MODIFICADO) Mínimo alto para demostrar bloqueo -->
-                    <limit>
-                      <counter>LINE</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>0.80</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-              </rules>
-            </configuration>
-          </execution>
+  <id>report-and-check</id>
+  <phase>verify</phase>
+  <goals>
+    <goal>report</goal>
+    <goal>check</goal>
+  </goals>
+  <configuration>
+    <rules>
+      <rule>
+        <!-- Gate por CLASE -->
+        <element>CLASS</element>
+
+        <!-- Limita a tu código y excluye UI/entrypoint del gate -->
+        <includes>
+          <include>com.abelg.buscaminas.*</include>
+        </includes>
+        <excludes>
+          <!-- App con main (no la usamos para bloquear) -->
+          <exclude>com.abelg.buscaminas.App*</exclude>
+          <!-- Todo lo de la capa Vista (consola) -->
+          <exclude>com.abelg.buscaminas.Vista.*</exclude>
+        </excludes>
+
+        <limits>
+          <!-- Mínimo razonable para seguir trabajando -->
+          <limit>
+            <counter>LINE</counter>
+            <value>COVEREDRATIO</value>
+            <minimum>0.80</minimum>
+          </limit>
+        </limits>
+      </rule>
+    </rules>
+  </configuration>
+</execution>
+
         </executions>
       </plugin>
 
