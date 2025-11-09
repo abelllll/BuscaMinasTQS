@@ -74,15 +74,15 @@
       <plugin>
   <groupId>org.jacoco</groupId>
   <artifactId>jacoco-maven-plugin</artifactId>
-  <!-- súbelo a la versión más nueva que tengas disponible; 0.8.12+ -->
   <version>0.8.12</version>
+
   <executions>
+    <!-- Inyecta el agente -->
     <execution>
       <goals>
         <goal>prepare-agent</goal>
       </goals>
       <configuration>
-        <!-- evita instrumentar clases del JDK -->
         <excludes>
           <exclude>java.*</exclude>
           <exclude>jdk.*</exclude>
@@ -90,28 +90,37 @@
         </excludes>
       </configuration>
     </execution>
+
+    <!-- Informe + verificación en verify (CLAVE para bloquear) -->
     <execution>
-      <id>report</id>
-      <phase>test</phase>
-      <goals>
-        <goal>report</goal>
-      </goals>
-    </execution>
-    <execution>
-      <id>check</id>
+      <id>report-and-check</id>
       <phase>verify</phase>
       <goals>
+        <goal>report</goal>
         <goal>check</goal>
       </goals>
       <configuration>
         <rules>
           <rule>
-            <element>BUNDLE</element>
+            <!-- Gate por CLASE -->
+            <element>CLASS</element>
+
+            <!-- Tu código -->
+            <includes>
+              <include>com.abelg.buscaminas.*</include>
+            </includes>
+
+            <!-- No bloquees por UI/entrada principal -->
+            <excludes>
+              <exclude>com.abelg.buscaminas.App*</exclude>
+              <exclude>com.abelg.buscaminas.Vista.*</exclude>
+            </excludes>
+
             <limits>
               <limit>
-                <counter>INSTRUCTION</counter>
+                <counter>LINE</counter>
                 <value>COVEREDRATIO</value>
-                <minimum>0.60</minimum>
+                <minimum>0.80</minimum>
               </limit>
             </limits>
           </rule>
@@ -120,6 +129,7 @@
     </execution>
   </executions>
 </plugin>
+
 
       <!-- Checkstyle: calidad (reglas Google por defecto) -->
       <plugin>
