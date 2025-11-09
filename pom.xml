@@ -70,56 +70,68 @@
         </configuration>
       </plugin>
 
-      <!-- JaCoCo: cobertura + gate mínimo -->
+      <!-- JaCoCo: cobertura + gate mínimo (CAMBIOS MÍNIMOS AQUÍ) -->
       <plugin>
-  <groupId>org.jacoco</groupId>
-  <artifactId>jacoco-maven-plugin</artifactId>
-  <!-- súbelo a la versión más nueva que tengas disponible; 0.8.12+ -->
-  <version>0.8.12</version>
-  <executions>
-    <execution>
-      <goals>
-        <goal>prepare-agent</goal>
-      </goals>
-      <configuration>
-        <!-- evita instrumentar clases del JDK -->
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <!-- dejamos la 0.8.12 como tenías -->
+        <version>0.8.12</version>
+        <executions>
+          <!-- Inyecta el agente de cobertura -->
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <!-- evita instrumentar clases del JDK -->
+              <excludes>
+                <exclude>java.*</exclude>
+                <exclude>jdk.*</exclude>
+                <exclude>sun.*</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+
+          <!-- (MODIFICADO) Generar informe + verificar reglas en verify -->
+          <execution>
+  <id>report-and-check</id>
+  <phase>verify</phase>
+  <goals>
+    <goal>report</goal>
+    <goal>check</goal>
+  </goals>
+  <configuration>
+    <rules>
+      <rule>
+        <!-- Gate por CLASE -->
+        <element>CLASS</element>
+
+        <!-- Limita a tu código y excluye UI/entrypoint del gate -->
+        <includes>
+          <include>com.abelg.buscaminas.*</include>
+        </includes>
         <excludes>
-          <exclude>java.*</exclude>
-          <exclude>jdk.*</exclude>
-          <exclude>sun.*</exclude>
+          <!-- App con main (no la usamos para bloquear) -->
+          <exclude>com.abelg.buscaminas.App*</exclude>
+          <!-- Todo lo de la capa Vista (consola) -->
+          <exclude>com.abelg.buscaminas.Vista.*</exclude>
         </excludes>
-      </configuration>
-    </execution>
-    <execution>
-      <id>report</id>
-      <phase>test</phase>
-      <goals>
-        <goal>report</goal>
-      </goals>
-    </execution>
-    <execution>
-      <id>check</id>
-      <phase>verify</phase>
-      <goals>
-        <goal>check</goal>
-      </goals>
-      <configuration>
-        <rules>
-          <rule>
-            <element>BUNDLE</element>
-            <limits>
-              <limit>
-                <counter>INSTRUCTION</counter>
-                <value>COVEREDRATIO</value>
-                <minimum>0.60</minimum>
-              </limit>
-            </limits>
-          </rule>
-        </rules>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
+
+        <limits>
+          <!-- Mínimo razonable para seguir trabajando -->
+          <limit>
+            <counter>LINE</counter>
+            <value>COVEREDRATIO</value>
+            <minimum>0.80</minimum>
+          </limit>
+        </limits>
+      </rule>
+    </rules>
+  </configuration>
+</execution>
+
+        </executions>
+      </plugin>
 
       <!-- Checkstyle: calidad (reglas Google por defecto) -->
       <plugin>
