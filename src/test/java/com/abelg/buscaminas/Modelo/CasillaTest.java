@@ -5,8 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CasillaTest {
 
-    // Test de Caja Negra: Verifica los valores iniciales de la casilla.
-    // En este caso, verificamos que la casilla se inicializa con valores predeterminados.
+    // Caja negra: valores iniciales por defecto
     @Test
     public void testInicializacionCasilla() {
         casilla c = new casilla();
@@ -16,27 +15,44 @@ public class CasillaTest {
         assertEquals(0, c.getMinasAdyacentes(), "El número de minas adyacentes debe ser 0 por defecto.");
     }
 
-    // Test de Caja Blanca: Verifica la lógica interna de la casilla al ser descubierta.
-    // Este test cubre una decisión interna, asegurando que se pueda cambiar el estado de descubierta.
+    // Caja blanca: descubrir cambia el estado a descubierta
     @Test
     public void testDescubrirCasilla() {
         casilla c = new casilla();
         c.descubrir();
-        assertTrue(c.isDescubierta(), "La casilla debe estar descubierta después de llamar al método descubrir.");
+        assertTrue(c.isDescubierta(), "La casilla debe estar descubierta tras descubrir.");
     }
 
-    // Test de Caja Blanca: Verifica la lógica interna de la casilla al ser marcada o desmarcada.
-    // Este test cubre las condiciones en las que la casilla puede ser marcada y desmarcada.
+    // Caja blanca: marcar alterna y no afecta al estado de 'descubierta'
     @Test
     public void testMarcarCasilla() {
         casilla c = new casilla();
-        
-        // Marca la casilla
+
+        // Marca
         c.marcar();
-        assertTrue(c.isMarcada(), "La casilla debe estar marcada después de llamar a marcar.");
-        
-        // Desmarca la casilla
+        assertTrue(c.isMarcada(), "La casilla debe estar marcada después de marcar.");
+
+        // Desmarca
         c.marcar();
-        assertFalse(c.isMarcada(), "La casilla debe estar desmarcada después de llamar a marcar nuevamente.");
+        assertFalse(c.isMarcada(), "La casilla debe estar desmarcada después de marcar de nuevo.");
+    }
+
+    // Cobertura de getters/setters de minas adyacentes
+    @Test
+    public void testSetGetMinasAdyacentes() {
+        casilla c = new casilla();
+        c.setMinasAdyacentes(3);
+        assertEquals(3, c.getMinasAdyacentes());
+    }
+
+    // Marcar cuando ya está descubierta NO debe cambiar el marcado
+    @Test
+    public void testMarcarCuandoDescubiertaNoCambia() {
+        casilla c = new casilla();
+        c.descubrir();
+        boolean antes = c.isMarcada();
+        c.marcar();
+        assertEquals(antes, c.isMarcada(), "No debe cambiar el marcado si la casilla está descubierta");
+        assertTrue(c.isDescubierta(), "Descubierta debe permanecer true");
     }
 }
