@@ -84,5 +84,44 @@ void testDescubrirNoFinaliza_partidaSigueEnCurso() {
     assertFalse(juego.isTerminado(), "No debe terminar la partida");
     assertEquals(EstadoPartida.EN_CURSO, juego.getEstado(), "Estado debe ser EN_CURSO");
 }
+@Test
+void testProcesarMarcarAlternaSinTerminar() {
+    Tablero tablero = new Tablero(3, 3, 1, new Random(7));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
+
+    // eligimos una casilla no minada cualquiera y marcamos/desmarcamos
+    int r = -1, c = -1;
+    outer:
+    for (int i = 0; i < tablero.getFilas(); i++) {
+        for (int j = 0; j < tablero.getColumnas(); j++) {
+            if (!tablero.getCasilla(i, j).isMinada()) { r = i; c = j; break outer; }
+        }
+    }
+    assertTrue(r >= 0, "Debe existir una casilla no minada");
+
+    juego.procesarMarcar(r, c); // marcar
+    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado());
+    assertTrue(tablero.getCasilla(r, c).isMarcada());
+
+    juego.procesarMarcar(r, c); // desmarcar
+    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado());
+    assertFalse(tablero.getCasilla(r, c).isMarcada());
+}
+
+@Test
+void testProcesarMarcarNoMarcaSiYaDescubierta() {
+    Tablero tablero = new Tablero(3, 3, 0, new Random(3));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
+
+    juego.procesarDescubrir(1, 1);
+    boolean antes = tablero.getCasilla(1,1).isMarcada();
+    juego.procesarMarcar(1, 1); // no debe marcar porque está descubierta
+
+    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado());
+    assertEquals(antes, tablero.getCasilla(1,1).isMarcada());
+}
+
 
 }
