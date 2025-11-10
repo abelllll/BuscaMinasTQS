@@ -101,58 +101,56 @@
       </goals>
       <configuration>
         <rules>
-          <rule>
-            <!-- Gate por CLASE -->
-            <element>CLASS</element>
+  <rule>
+    <!-- Gate por CLASE -->
+    <element>CLASS</element>
 
-            <!-- Tu código -->
-            <includes>
-              <include>com.abelg.buscaminas.*</include>
-            </includes>
+    <!-- Limita la comprobación a tu código de producción -->
+    <includes>
+      <include>com.abelg.buscaminas.*</include>
+    </includes>
 
-            <!-- No bloquees por UI/entrada principal -->
-            <excludes>
-              <exclude>com.abelg.buscaminas.App*</exclude>
-              <exclude>com.abelg.buscaminas.Vista.*</exclude>
-            </excludes>
+    <!-- Excluye la UI y la clase de arranque (no piden cubrir la Vista) -->
+    <excludes>
+      <exclude>com.abelg.buscaminas.App*</exclude>
+      <exclude>com.abelg.buscaminas.Vista.*</exclude>
+    </excludes>
 
-            <limits>
-              <limit>
-                <counter>LINE</counter>
-                <value>COVEREDRATIO</value>
-                <minimum>0.80</minimum>
-              </limit>
-            </limits>
-          </rule>
-        </rules>
+    <!-- Exige 100% de líneas cubiertas por clase -->
+    <limits>
+      <limit>
+        <counter>LINE</counter>
+        <value>COVEREDRATIO</value>
+        <minimum>1.0</minimum>
+      </limit>
+    </limits>
+  </rule>
+</rules>
+
       </configuration>
     </execution>
   </executions>
 </plugin>
 
 
-      <!-- Checkstyle: calidad (reglas Google por defecto) -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
-        <executions>
-          <execution>
-            <id>validate-style</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <!-- Puedes usar google_checks.xml del propio plugin o añadir uno en la raíz del repo -->
-              <configLocation>google_checks.xml</configLocation>
-              <encoding>UTF-8</encoding>
-              <consoleOutput>true</consoleOutput>
-              <failsOnError>true</failsOnError>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-checkstyle-plugin</artifactId>
+  <version>3.3.1</version>
+  <executions>
+    <execution>
+      <phase>verify</phase>
+      <goals><goal>check</goal></goals>
+    </execution>
+  </executions>
+  <configuration>
+    <configLocation>src/main/resources/checkstyle.xml</configLocation>
+    <encoding>UTF-8</encoding>
+    <consoleOutput>true</consoleOutput>
+    <failsOnError>true</failsOnError>
+  </configuration>
+</plugin>
+
 
     </plugins>
   </build>

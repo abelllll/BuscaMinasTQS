@@ -1,30 +1,39 @@
-name: CI
+name: ci
+
 on:
   pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
+    branches: [ "main" ]
+  # (Opcional) permitir lanzarlo a mano desde la UI
+  workflow_dispatch:
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
           cache: maven
 
-      - name: Build & Test (unit + coverage + checkstyle)
-        run: mvn -B -q clean verify
+      - name: Build & Test (fail on coverage/style)
+        run: mvn -B -DskipTests=false clean verify
 
-      - name: Publicar informe JaCoCo
+      - name: Upload JaCoCo report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: target/site/jacoco
+
+      - name: Upload Surefire reports (JUnit)
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports
