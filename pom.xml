@@ -116,7 +116,7 @@
       <exclude>com.abelg.buscaminas.Vista.*</exclude>
     </excludes>
 
-    <!-- 💥 Exige 100% de líneas cubiertas por clase -->
+    <!-- Exige 100% de líneas cubiertas por clase -->
     <limits>
       <limit>
         <counter>LINE</counter>
@@ -133,28 +133,24 @@
 </plugin>
 
 
-      <!-- Checkstyle: calidad (reglas Google por defecto) -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
-        <executions>
-          <execution>
-            <id>validate-style</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <!-- Puedes usar google_checks.xml del propio plugin o añadir uno en la raíz del repo -->
-              <configLocation>google_checks.xml</configLocation>
-              <encoding>UTF-8</encoding>
-              <consoleOutput>true</consoleOutput>
-              <failsOnError>true</failsOnError>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-checkstyle-plugin</artifactId>
+  <version>3.3.1</version>
+  <executions>
+    <execution>
+      <phase>verify</phase>
+      <goals><goal>check</goal></goals>
+    </execution>
+  </executions>
+  <configuration>
+    <configLocation>src/main/resources/checkstyle.xml</configLocation>
+    <encoding>UTF-8</encoding>
+    <consoleOutput>true</consoleOutput>
+    <failsOnError>true</failsOnError>
+  </configuration>
+</plugin>
+
 
     </plugins>
   </build>
