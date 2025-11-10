@@ -55,4 +55,23 @@ public class CasillaTest {
         assertEquals(antes, c.isMarcada(), "No debe cambiar el marcado si la casilla está descubierta");
         assertTrue(c.isDescubierta(), "Descubierta debe permanecer true");
     }
+    @Test
+public void testToStringCubreEstados() {
+    casilla c = new casilla();
+    // estado por defecto
+    String s1 = c.toString();
+    assertNotNull(s1);
+
+    // marcada
+    c.marcar();
+    String s2 = c.toString();
+    assertNotNull(s2);
+
+    // descubierta con minas adyacentes
+    c.descubrir();
+    c.setMinasAdyacentes(2);
+    String s3 = c.toString();
+    assertNotNull(s3);
+}
+
 }
