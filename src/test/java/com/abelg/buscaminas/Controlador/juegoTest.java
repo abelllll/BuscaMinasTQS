@@ -111,17 +111,37 @@ void testProcesarMarcarAlternaSinTerminar() {
 
 @Test
 void testProcesarMarcarNoMarcaSiYaDescubierta() {
-    Tablero tablero = new Tablero(3, 3, 0, new Random(3));
+    // Evita victoria accidental: 3x3 con 2 minas
+    Tablero tablero = new Tablero(3, 3, 2, new Random(17));
     Vista vista = new VistaFake();
     Juego juego = new Juego(tablero, vista);
 
-    juego.procesarDescubrir(1, 1);
-    boolean antes = tablero.getCasilla(1,1).isMarcada();
-    juego.procesarMarcar(1, 1); // no debe marcar porque está descubierta
+    // Descubre una casilla NO minada con adyacentes>0 (sin cascada)
+    int r = -1, c = -1;
+    outer:
+    for (int i = 0; i < tablero.getFilas(); i++) {
+        for (int j = 0; j < tablero.getColumnas(); j++) {
+            if (!tablero.getCasilla(i, j).isMinada()
+                    && tablero.getCasilla(i, j).getMinasAdyacentes() > 0) {
+                r = i; c = j; break outer;
+            }
+        }
+    }
+    assertTrue(r >= 0, "Debe existir casilla no minada con adyacentes>0");
 
-    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado());
-    assertEquals(antes, tablero.getCasilla(1,1).isMarcada());
+    // Descubrirla no debe finalizar (EN_CURSO)
+    juego.procesarDescubrir(r, c);
+    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado(), "Tras descubrir, debe seguir EN_CURSO");
+    assertTrue(tablero.getCasilla(r, c).isDescubierta());
+
+    // Intento de marcar una casilla ya descubierta: NO debe marcar ni cambiar estado
+    boolean marcadaAntes = tablero.getCasilla(r, c).isMarcada();
+    juego.procesarMarcar(r, c);
+    assertEquals(marcadaAntes, tablero.getCasilla(r, c).isMarcada(),
+            "No debe marcar una casilla ya descubierta");
+    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado(), "Estado debe seguir EN_CURSO");
 }
+
 
 
 }
