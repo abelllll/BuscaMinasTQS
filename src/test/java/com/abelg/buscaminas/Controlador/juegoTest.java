@@ -59,25 +59,30 @@ public class juegoTest {
     }
 
     @Test
-    void testDescubrirNoFinaliza_partidaSigueEnCurso() {
-        // Caso EN_CURSO: descubrir una casilla no minada sin completar la victoria
-        Tablero tablero = new Tablero(3, 3, 1, new Random(123));
-        Vista vista = new VistaFake();
-        Juego juego = new Juego(tablero, vista);
+void testDescubrirNoFinaliza_partidaSigueEnCurso() {
+    // Usamos 3x3 con 2 minas para aumentar la probabilidad de casillas con adyacentes>0
+    Tablero tablero = new Tablero(3, 3, 2, new Random(123));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
 
-        // Buscar una casilla NO minada para no terminar la partida
-        int rNoMina = -1, cNoMina = -1;
-        outer:
-        for (int r = 0; r < tablero.getFilas(); r++) {
-            for (int c = 0; c < tablero.getColumnas(); c++) {
-                if (!tablero.getCasilla(r, c).isMinada()) { rNoMina = r; cNoMina = c; break outer; }
+    // Buscar una casilla NO minada y con minas adyacentes > 0 (evita cascada)
+    int rCandidata = -1, cCandidata = -1;
+    outer:
+    for (int r = 0; r < tablero.getFilas(); r++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (!tablero.getCasilla(r, c).isMinada()
+                    && tablero.getCasilla(r, c).getMinasAdyacentes() > 0) {
+                rCandidata = r; cCandidata = c; break outer;
             }
         }
-        assertTrue(rNoMina >= 0, "Debe existir alguna casilla no minada");
-
-        juego.procesarDescubrir(rNoMina, cNoMina);
-
-        assertFalse(juego.isTerminado(), "No debe terminar la partida");
-        assertEquals(EstadoPartida.EN_CURSO, juego.getEstado(), "Estado debe ser EN_CURSO");
     }
+    // Como hay 2 minas en 3x3, debe existir al menos una casilla adyacente>0
+    assertTrue(rCandidata >= 0, "Debe existir casilla no minada con adyacentes>0");
+
+    juego.procesarDescubrir(rCandidata, cCandidata);
+
+    assertFalse(juego.isTerminado(), "No debe terminar la partida");
+    assertEquals(EstadoPartida.EN_CURSO, juego.getEstado(), "Estado debe ser EN_CURSO");
+}
+
 }
