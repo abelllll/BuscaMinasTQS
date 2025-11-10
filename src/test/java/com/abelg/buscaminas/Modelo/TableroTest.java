@@ -154,4 +154,12 @@ public class TableroTest {
         assertThrows(IllegalArgumentException.class, () -> t.marcar(-1, 0));
         assertThrows(IllegalArgumentException.class, () -> t.marcar(0, 2));
     }
+    @Test
+void testToStringDevuelveAlgoInformativo() {
+    Tablero t = new Tablero(2, 3, 1, new Random(10));
+    String s = t.toString();
+    assertNotNull(s);
+    assertFalse(s.isBlank(), "toString no debe ser vacío");
+}
+
 }
