@@ -57,5 +57,58 @@ void testVictoriaCuandoTodasNoMinadasDescubiertas() {
     assertTrue(juego.isTerminado(), "Debe terminar cuando todas las no minadas estén descubiertas");
     assertEquals(EstadoPartida.GANADA, juego.getEstado(), "Estado debe ser GANADA");
 }
+// Caja negra + mock object – comprobar que marcar alterna el estado
+@Test
+void testMarcarAlternaMarcaYDesmarca() {
+    Tablero tablero = new Tablero(2, 2, 0, new Random(1));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
+
+    // Primera marca -> casilla marcada
+    juego.procesarMarcar(0, 0);
+    assertTrue(tablero.getCasilla(0,0).isMarcada(),
+            "La casilla debe quedar marcada tras la primera llamada");
+
+    // Segunda marca -> desmarca
+    juego.procesarMarcar(0, 0);
+    assertFalse(tablero.getCasilla(0,0).isMarcada(),
+            "La casilla debe quedar desmarcada tras la segunda llamada");
+}
+
+// Caja negra – no se debe poder marcar una casilla descubierta
+@Test
+void testNoMarcaCasillaDescubierta() {
+    Tablero tablero = new Tablero(2, 2, 0, new Random(1));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
+
+    juego.procesarDescubrir(0, 0);
+    assertTrue(tablero.getCasilla(0,0).isDescubierta(),
+            "La casilla debe estar descubierta antes de intentar marcar");
+
+    juego.procesarMarcar(0, 0);
+    assertFalse(tablero.getCasilla(0,0).isMarcada(),
+            "No se debe marcar una casilla ya descubierta");
+}
+
+// Caja blanca – decisión/condición en procesarDescubrir (terminado = true)
+@Test
+void testProcesarDescubrirNoHaceNadaSiPartidaTerminada() {
+    // Tablero pequeño con todas las casillas minadas -> cualquier descubrimiento pierde
+    Tablero tablero = new Tablero(2, 2, 4, new Random(1));
+    Vista vista = new VistaFake();
+    Juego juego = new Juego(tablero, vista);
+
+    // Primera jugada: descubrir una mina -> termina en PERDIDA
+    juego.procesarDescubrir(0, 0);
+    assertTrue(juego.isTerminado(), "La partida debe estar terminada");
+    EstadoPartida estadoAntes = juego.getEstado();
+
+    // Segunda llamada: la rama if(terminado) debe ejecutarse y no cambiar nada
+    assertDoesNotThrow(() -> juego.procesarDescubrir(1, 1),
+            "No debe lanzar excepción al llamar después de terminar");
+    assertEquals(estadoAntes, juego.getEstado(),
+            "El estado no debe cambiar al intentar descubrir con la partida terminada");
+}
 
 }
