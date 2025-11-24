@@ -192,6 +192,38 @@ void testConstructorTablero1x1ValoresLimite() {
     assertEquals(1, conMina.getNumMinas());
     assertTrue(conMina.getCasilla(0,0).isMinada());
 }
+// Loop testing – bucle while de colocarMinas con 0, 1 y N iteraciones
+@Test
+void testColocarMinasLoop_0_1_N() {
+    // 0 minas: el bucle while no debería colocar ninguna
+    Tablero sinMinas = new Tablero(3, 3, 0, new Random(1));
+    int minas0 = contarMinasEnTablero(sinMinas);
+    assertEquals(0, minas0, "Con 0 minas no debería haber ninguna casilla minada");
+
+    // 1 mina: el bucle itera al menos una vez
+    Tablero unaMina = new Tablero(3, 3, 1, new Random(1));
+    int minas1 = contarMinasEnTablero(unaMina);
+    assertEquals(1, minas1, "Debe colocarse exactamente 1 mina");
+
+    // N minas: el bucle itera varias veces hasta colocar N minas
+    Tablero variasMinas = new Tablero(3, 3, 5, new Random(1));
+    int minasN = contarMinasEnTablero(variasMinas);
+    assertEquals(5, minasN, "Debe colocarse exactamente 5 minas");
+}
+
+// Método auxiliar privado para contar minas en un tablero (solo para estos tests)
+private int contarMinasEnTablero(Tablero tablero) {
+    int count = 0;
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (tablero.getCasilla(f, c).isMinada()) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 
 
 
