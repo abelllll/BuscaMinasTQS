@@ -223,6 +223,143 @@ private int contarMinasEnTablero(Tablero tablero) {
     }
     return count;
 }
+// Path coverage – casilla marcada: descubrir no hace nada
+@Test
+void testDescubrirCasillaMarcadaNoLaDescubre() {
+    Tablero tablero = new Tablero(3, 3, 1, new Random(10));
+    tablero.marcar(0, 0);
+    assertTrue(tablero.getCasilla(0,0).isMarcada());
+
+    tablero.descubrir(0, 0);
+
+    assertFalse(tablero.getCasilla(0,0).isDescubierta(),
+            "Una casilla marcada no debe descubrirse");
+}
+
+// Path coverage – casilla ya descubierta: segunda llamada no cambia el estado
+@Test
+void testDescubrirCasillaYaDescubiertaNoCambiaEstado() {
+    Tablero tablero = new Tablero(3, 3, 0, new Random(1)); // sin minas
+    tablero.descubrir(1, 1);
+    assertTrue(tablero.getCasilla(1,1).isDescubierta());
+
+    boolean[][] estadoAntes = new boolean[tablero.getFilas()][tablero.getColumnas()];
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            estadoAntes[f][c] = tablero.getCasilla(f, c).isDescubierta();
+        }
+    }
+
+    tablero.descubrir(1, 1); // segunda llamada
+
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            assertEquals(estadoAntes[f][c],
+                    tablero.getCasilla(f, c).isDescubierta(),
+                    "Descubrir una casilla ya descubierta no debe cambiar nada");
+        }
+    }
+}
+
+// Path coverage – descubrir una mina: solo esa casilla se descubre, sin cascada
+@Test
+void testDescubrirMinaNoProvocaCascada() {
+    Tablero tablero = new Tablero(4, 4, 3, new Random(2));
+
+    int mf = -1, mc = -1;
+    outer:
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (tablero.getCasilla(f,c).isMinada()) {
+                mf = f;
+                mc = c;
+                break outer;
+            }
+        }
+    }
+    assertTrue(mf >= 0 && mc >= 0, "Debe existir una mina en el tablero");
+
+    tablero.descubrir(mf, mc);
+
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (f == mf && c == mc) {
+                assertTrue(tablero.getCasilla(f,c).isDescubierta(),
+                        "La mina descubierta debe estar marcada como descubierta");
+            } else {
+                assertFalse(tablero.getCasilla(f,c).isDescubierta(),
+                        "Descubrir una mina no debe descubrir las demás casillas");
+            }
+        }
+    }
+}
+
+// Path coverage – casilla segura con minas adyacentes > 0: no hay cascada
+@Test
+void testDescubrirConMinasAdyacentesNoHaceCascada() {
+    Tablero tablero = new Tablero(4, 4, 3, new Random(3));
+
+    int sf = -1, sc = -1;
+    outer:
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            casilla celda = tablero.getCasilla(f,c);
+            if (!celda.isMinada() && celda.getMinasAdyacentes() > 0) {
+                sf = f;
+                sc = c;
+                break outer;
+            }
+        }
+    }
+    assertTrue(sf >= 0 && sc >= 0, "Debe existir una casilla segura con minas adyacentes > 0");
+
+    tablero.descubrir(sf, sc);
+
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (f == sf && c == sc) {
+                assertTrue(tablero.getCasilla(f,c).isDescubierta());
+            } else {
+                assertFalse(tablero.getCasilla(f,c).isDescubierta(),
+                        "No debe haber cascada cuando hay minas adyacentes > 0");
+            }
+        }
+    }
+}
+
+// Path coverage – casilla segura con 0 minas adyacentes: sí hay cascada
+@Test
+void testDescubrirSinMinasAdyacentesHaceCascada() {
+    Tablero tablero = new Tablero(4, 4, 1, new Random(23));
+
+    int sf = -1, sc = -1;
+    outer:
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            casilla celda = tablero.getCasilla(f,c);
+            if (!celda.isMinada() && celda.getMinasAdyacentes() == 0) {
+                sf = f;
+                sc = c;
+                break outer;
+            }
+        }
+    }
+    assertTrue(sf >= 0 && sc >= 0, "Debe existir una casilla segura con 0 minas adyacentes");
+
+    tablero.descubrir(sf, sc);
+
+    int descubiertas = 0;
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (tablero.getCasilla(f,c).isDescubierta()) {
+                descubiertas++;
+            }
+        }
+    }
+
+    assertTrue(descubiertas > 1,
+            "La cascada debe descubrir varias casillas cuando no hay minas adyacentes");
+}
 
 
 
