@@ -153,6 +153,46 @@ void testMarcarFueraDeRangoLanzaExcepcion() {
     assertThrows(IllegalArgumentException.class, () -> t.marcar(-1, 0));
     assertThrows(IllegalArgumentException.class, () -> t.marcar(0, 2));
 }
+// Caja negra – valores límite y frontera para el constructor de Tablero
+@Test
+void testConstructorDimensionesInvalidasLanzaExcepcion() {
+    // filas o columnas <= 0
+    assertThrows(IllegalArgumentException.class,
+            () -> new Tablero(0, 1, 0, new Random(1)));
+    assertThrows(IllegalArgumentException.class,
+            () -> new Tablero(1, 0, 0, new Random(1)));
+    assertThrows(IllegalArgumentException.class,
+            () -> new Tablero(-1, 3, 0, new Random(1)));
+    assertThrows(IllegalArgumentException.class,
+            () -> new Tablero(3, -1, 0, new Random(1)));
+}
+
+@Test
+void testConstructorNumMinasInvalidoLanzaExcepcion() {
+    // numMinas negativo
+    assertThrows(IllegalArgumentException.class,
+            () -> new Tablero(2, 2, -1, new Random(1)));
+    // numMinas mayor que filas*columnas
+    assertThrows(IllegalArgumentException.class,
+            () -> new Tablero(2, 2, 5, new Random(1))); // 2*2 = 4
+}
+
+// Caja negra – valores límite: tablero 1x1 con 0 y 1 mina
+@Test
+void testConstructorTablero1x1ValoresLimite() {
+    Tablero sinMinas = new Tablero(1, 1, 0, new Random(1));
+    assertEquals(1, sinMinas.getFilas());
+    assertEquals(1, sinMinas.getColumnas());
+    assertEquals(0, sinMinas.getNumMinas());
+    assertFalse(sinMinas.getCasilla(0,0).isMinada());
+
+    Tablero conMina = new Tablero(1, 1, 1, new Random(1));
+    assertEquals(1, conMina.getFilas());
+    assertEquals(1, conMina.getColumnas());
+    assertEquals(1, conMina.getNumMinas());
+    assertTrue(conMina.getCasilla(0,0).isMinada());
+}
+
 
 
 
