@@ -16,6 +16,26 @@ public class juegoTest {
         @Override public void mostrarTablero(Tablero t) { /* no-op */ }
         @Override public void mostrarMensaje(String msg) { /* no-op */ }
     }
+    // Vista "spy" para verificar las interacciones entre Juego y Vista
+static class VistaSpy implements Vista {
+    Tablero ultimoTableroMostrado;
+    String ultimoMensaje;
+    int numVecesMostrarTablero = 0;
+    int numVecesMostrarMensaje = 0;
+
+    @Override
+    public void mostrarTablero(Tablero t) {
+        ultimoTableroMostrado = t;
+        numVecesMostrarTablero++;
+    }
+
+    @Override
+    public void mostrarMensaje(String msg) {
+        ultimoMensaje = msg;
+        numVecesMostrarMensaje++;
+    }
+}
+
 
     @Test
     void testDescubrirMinaTerminaEnPerdida() {
@@ -110,5 +130,89 @@ void testProcesarDescubrirNoHaceNadaSiPartidaTerminada() {
     assertEquals(estadoAntes, juego.getEstado(),
             "El estado no debe cambiar al intentar descubrir con la partida terminada");
 }
+// Mock object + caja blanca – comprobar mensaje y tablero al perder
+@Test
+void testVistaRecibeMensajePerdidaYTablero() {
+    Tablero tablero = new Tablero(3, 3, 2, new Random(7));
+    VistaSpy vista = new VistaSpy();
+    Juego juego = new Juego(tablero, vista);
+
+    // Buscar una mina para forzar la derrota
+    int mf = -1, mc = -1;
+    outer:
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (tablero.getCasilla(f,c).isMinada()) {
+                mf = f;
+                mc = c;
+                break outer;
+            }
+        }
+    }
+    assertTrue(mf >= 0 && mc >= 0, "Debe existir una mina en el tablero");
+
+    juego.procesarDescubrir(mf, mc);
+
+    assertEquals(EstadoPartida.PERDIDA, juego.getEstado());
+    assertEquals("Has perdido", vista.ultimoMensaje,
+            "Al perder se debe mostrar el mensaje de derrota");
+    assertEquals(1, vista.numVecesMostrarMensaje,
+            "Al perder debe mostrarse exactamente un mensaje");
+    assertEquals(1, vista.numVecesMostrarTablero,
+            "Al perder debe mostrarse el tablero una vez");
+    assertNotNull(vista.ultimoTableroMostrado,
+            "El tablero mostrado no debe ser null");
+}
+
+// Mock object + caja blanca – comprobar mensaje y tablero al ganar
+@Test
+void testVistaRecibeMensajeVictoriaYTablero() {
+    Tablero tablero = new Tablero(2, 2, 1, new Random(1));
+    VistaSpy vista = new VistaSpy();
+    Juego juego = new Juego(tablero, vista);
+
+    // Descubrir todas las casillas no minadas
+    for (int f = 0; f < tablero.getFilas(); f++) {
+        for (int c = 0; c < tablero.getColumnas(); c++) {
+            if (!tablero.getCasilla(f,c).isMinada()) {
+                juego.procesarDescubrir(f, c);
+            }
+        }
+    }
+
+    assertEquals(EstadoPartida.GANADA, juego.getEstado(),
+            "Al descubrir todas las casillas seguras la partida debe estar GANADA");
+    assertEquals("¡Has ganado!", vista.ultimoMensaje,
+            "Al ganar se debe mostrar el mensaje de victoria");
+    assertTrue(vista.numVecesMostrarTablero >= 1,
+            "Durante la partida y al ganar se debe mostrar el tablero al menos una vez");
+    assertTrue(vista.numVecesMostrarMensaje >= 1,
+            "Debe haberse mostrado al menos el mensaje de victoria");
+}
+
+// Caja blanca – rama if(terminado) en procesarMarcar no llama a la vista
+@Test
+void testProcesarMarcarNoLlamaVistaSiPartidaTerminada() {
+    Tablero tablero = new Tablero(2, 2, 4, new Random(42)); // todas minadas
+    VistaSpy vista = new VistaSpy();
+    Juego juego = new Juego(tablero, vista);
+
+    // Primera jugada: descubrir una mina -> termina en PERDIDA
+    juego.procesarDescubrir(0, 0);
+    assertTrue(juego.isTerminado(), "La partida debe estar terminada");
+
+    // Reseteamos contadores del spy para medir solo lo que pasa después
+    vista.numVecesMostrarTablero = 0;
+    vista.numVecesMostrarMensaje = 0;
+
+    // Ahora procesarMarcar debe entrar en la rama if(terminado) y no tocar la vista
+    juego.procesarMarcar(0, 1);
+
+    assertEquals(0, vista.numVecesMostrarTablero,
+            "No se debe mostrar el tablero al marcar tras terminar la partida");
+    assertEquals(0, vista.numVecesMostrarMensaje,
+            "No se deben mostrar mensajes al marcar tras terminar la partida");
+}
+
 
 }
