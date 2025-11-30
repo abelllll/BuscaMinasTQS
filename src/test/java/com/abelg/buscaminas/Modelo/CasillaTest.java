@@ -7,6 +7,7 @@ public class CasillaTest {
 
     // Test de Caja Negra: Verifica los valores iniciales de la casilla.
     // En este caso, verificamos que la casilla se inicializa con valores predeterminados.
+    //Se añade un comentario para hacer Prueba de CI worklflow
     @Test
     public void testInicializacionCasilla() {
         casilla c = new casilla();
