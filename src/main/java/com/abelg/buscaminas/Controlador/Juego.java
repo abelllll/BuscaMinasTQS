@@ -20,11 +20,14 @@ public class Juego {
     public boolean isTerminado() { return terminado; }
     public EstadoPartida getEstado() { return estado; }
 
-    public void procesarDescubrir(int f, int c) {
-        if (terminado) return;
+        public void procesarDescubrir(int f, int c) {
+        if (terminado) {
+            return;
+        }
 
         tablero.descubrir(f, c);
 
+        // Si la casilla descubierta es una mina -> derrota
         if (tablero.getCasilla(f, c).isMinada()) {
             this.estado = EstadoPartida.PERDIDA;
             this.terminado = true;
@@ -33,12 +36,18 @@ public class Juego {
             return;
         }
 
-        // Actualiza vista tras descubrir sin mina
+        // Actualizar vista tras descubrir una casilla segura
         vista.mostrarTablero(tablero);
 
-        // Comprobar si todas las no minadas están descubiertas -> victoria
-        comprobarVictoria();
+        // Preguntar al modelo si ya se cumple la condición de victoria
+        if (tablero.todasNoMinadasDescubiertas()) {
+            this.estado = EstadoPartida.GANADA;
+            this.terminado = true;
+            vista.mostrarMensaje("¡Has ganado!");
+            vista.mostrarTablero(tablero);
+        }
     }
+
 
     public void procesarMarcar(int f, int c) {
         if (terminado) return;
@@ -46,21 +55,5 @@ public class Juego {
         vista.mostrarTablero(tablero);
     }
 
-    // --- Comprobación de victoria ---
-    private void comprobarVictoria() {
-        for (int fila = 0; fila < tablero.getFilas(); fila++) {
-            for (int col = 0; col < tablero.getColumnas(); col++) {
-                // Si existe alguna casilla NO minada y NO descubierta -> no hay victoria aún
-                if (!tablero.getCasilla(fila, col).isMinada()
-                        && !tablero.getCasilla(fila, col).isDescubierta()) {
-                    return;
-                }
-            }
-        }
-        // Si llegamos aquí, todas las no minadas están descubiertas
-        this.estado = EstadoPartida.GANADA;
-        this.terminado = true;
-        vista.mostrarMensaje("¡Has ganado!");
-        vista.mostrarTablero(tablero);
-    }
+    
 }

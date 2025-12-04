@@ -360,6 +360,47 @@ void testDescubrirSinMinasAdyacentesHaceCascada() {
     assertTrue(descubiertas > 1,
             "La cascada debe descubrir varias casillas cuando no hay minas adyacentes");
 }
+    // Caja negra – condición de victoria en el modelo:
+    // true solo cuando TODAS las casillas no minadas están descubiertas
+    @Test
+    void testTodasNoMinadasDescubiertasSoloCuandoTodasSegurasDescubiertas() {
+        Tablero tablero = new Tablero(2, 2, 1, new Random(1));
+
+        // Al inicio no debería haber victoria
+        assertFalse(tablero.todasNoMinadasDescubiertas(),
+                "Al inicio no debería considerarse victoria");
+
+        // Descubrimos SOLO una casilla segura
+        boolean descubiertaUna = false;
+        outer:
+        for (int f = 0; f < tablero.getFilas(); f++) {
+            for (int c = 0; c < tablero.getColumnas(); c++) {
+                if (!tablero.getCasilla(f, c).isMinada()) {
+                    tablero.descubrir(f, c);
+                    descubiertaUna = true;
+                    break outer;
+                }
+            }
+        }
+        assertTrue(descubiertaUna, "Debe haberse descubierto al menos una casilla segura");
+        assertFalse(tablero.todasNoMinadasDescubiertas(),
+                "Con casillas seguras sin descubrir aún no debe haber victoria");
+
+        // Descubrimos el RESTO de casillas no minadas
+        for (int f = 0; f < tablero.getFilas(); f++) {
+            for (int c = 0; c < tablero.getColumnas(); c++) {
+                if (!tablero.getCasilla(f, c).isMinada()
+                        && !tablero.getCasilla(f, c).isDescubierta()) {
+                    tablero.descubrir(f, c);
+                }
+            }
+        }
+
+        // Ahora sí: todas las no minadas están descubiertas
+        assertTrue(tablero.todasNoMinadasDescubiertas(),
+                "Cuando todas las casillas seguras están descubiertas debe devolver true");
+    }
+
 
 
 
