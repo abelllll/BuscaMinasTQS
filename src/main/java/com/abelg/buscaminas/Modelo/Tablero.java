@@ -116,4 +116,20 @@ public void marcar(int f, int c) {
     // Alterna marcado con tu método existente
     celda.marcar();
 }
+    /**
+     * Devuelve true solo si TODAS las casillas no minadas están descubiertas.
+     * Es decir, si no existe ninguna casilla segura todavía oculta.
+     */
+    public boolean todasNoMinadasDescubiertas() {
+        for (int f = 0; f < filas; f++) {
+            for (int c = 0; c < columnas; c++) {
+                casilla celda = celdas[f][c];
+                if (!celda.isMinada() && !celda.isDescubierta()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
