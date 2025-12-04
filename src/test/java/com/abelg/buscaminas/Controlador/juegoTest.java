@@ -58,6 +58,33 @@ static class VistaSpy implements Vista {
         assertTrue(juego.isTerminado(), "La partida debe terminar al descubrir mina");
         assertEquals(EstadoPartida.PERDIDA, juego.getEstado(), "Estado debe ser PERDIDA");
     }
+        // Caja negra – descubrir una casilla segura NO debe terminar la partida
+    @Test
+    void testDescubrirCasillaSeguraMantienePartidaEnCurso() {
+        Tablero tablero = new Tablero(2, 2, 1, new Random(3)); // 1 mina
+        Vista vista = new VistaFake();
+        Juego juego = new Juego(tablero, vista);
+
+        // Buscamos una casilla NO minada y la descubrimos
+        boolean descubierta = false;
+        outer:
+        for (int f = 0; f < tablero.getFilas(); f++) {
+            for (int c = 0; c < tablero.getColumnas(); c++) {
+                if (!tablero.getCasilla(f, c).isMinada()) {
+                    juego.procesarDescubrir(f, c);
+                    descubierta = true;
+                    break outer;
+                }
+            }
+        }
+
+        assertTrue(descubierta, "Debe haberse descubierto al menos una casilla segura");
+        assertFalse(juego.isTerminado(),
+                "Tras descubrir una casilla segura sin completar el tablero la partida debe seguir en curso");
+        assertEquals(EstadoPartida.EN_CURSO, juego.getEstado(),
+                "El estado debe seguir siendo EN_CURSO tras descubrir solo una casilla segura");
+    }
+
     @Test
 void testVictoriaCuandoTodasNoMinadasDescubiertas() {
     // Tablero pequeño con 1 mina
